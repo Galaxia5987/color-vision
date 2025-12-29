@@ -1,0 +1,10 @@
+[project]
+name = "color-vision"
+version = "0.1.0"
+description = "FRC Vision for color detection"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.128.0",
+    "opencv-python>=4.12.0.88",
+]
