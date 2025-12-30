@@ -1,6 +1,6 @@
 import asyncio
 import threading
-
+from abc import ABC, abstractmethod
 # Global background loop
 _background_loop = None
 _background_thread = None
@@ -23,12 +23,13 @@ def _ensure_background_loop():
     return _background_loop
 
 
-class AsyncLoopBase:
+class AsyncLoopBase(ABC):
     def __init__(self, interval):
         self.interval = interval
         self._task = None
         self._stop = asyncio.Event()
-
+    
+    @abstractmethod
     def on_iteration(self):
         raise NotImplementedError
 
@@ -63,6 +64,10 @@ class AsyncLoopBase:
             loop = _ensure_background_loop()
             self._task = asyncio.run_coroutine_threadsafe(self._runner(), loop)
 
+    @abstractmethod
+    def on_stop(self):
+        raise NotImplementedError()
+
     async def stop(self):
         """Async stop, awaits the task."""
         self._stop.set()
@@ -72,6 +77,7 @@ class AsyncLoopBase:
                 await self._task
             except asyncio.CancelledError:
                 pass
+        self.on_stop()
 
     def stop_sync(self):
         """Sync stop that waits for completion."""
@@ -86,3 +92,4 @@ class AsyncLoopBase:
                 self._task.result()
             except Exception:
                 pass
+        self.on_stop()
