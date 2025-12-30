@@ -1,6 +1,10 @@
 import asyncio
 import threading
+<<<<<<< HEAD
 
+=======
+from abc import ABC, abstractmethod
+>>>>>>> 7b941dafed8cb7207c0c947df8acce9396ae8ccb
 # Global background loop
 _background_loop = None
 _background_thread = None
@@ -28,7 +32,6 @@ class AsyncLoopBase:
         self.interval = interval
         self._task = None
         self._stop = asyncio.Event()
-
     def on_iteration(self):
         raise NotImplementedError
 

@@ -62,6 +62,7 @@ dependencies = [
     { name = "colorlog" },
     { name = "fastapi", extra = ["standard"] },
     { name = "opencv-python" },
+    { name = "pydantic" },
 ]
 
 [package.metadata]
@@ -69,6 +70,7 @@ requires-dist = [
     { name = "colorlog", specifier = ">=6.10.1" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.0" },
     { name = "opencv-python", specifier = ">=4.12.0.88" },
+    { name = "pydantic", specifier = ">=2.12.5" },
 ]
 
 [[package]]
