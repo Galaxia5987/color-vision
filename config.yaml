@@ -1,0 +1,7 @@
+camera:
+  usb_index: 0
+  detection_stream_enabled: true
+  mask_stream_enabled: true
+detection:
+  limits: [[61,48,43], [103,255,255]]
+
