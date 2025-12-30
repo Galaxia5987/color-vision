@@ -24,14 +24,12 @@ class Initializer:
         self.app.state.config = ConfigManager().get()
         self.config = self.app.state.config
 
-        self.init_camera()
         self.init_detector()
-        # self.init_calibrator()
         self.init_detection_runner()
-        self.setup_stream_routes()
 
-    def init_camera(self):
-        self.app.state.camera = cv.VideoCapture(self.config.camera.usb_index)
+        # self.init_calibrator()
+        
+        self.setup_stream_routes()
 
     def init_calibrator(self):
         self.calibrator = ColorCalibrator(self.app.state.camera)
@@ -43,7 +41,7 @@ class Initializer:
         self.app.state.detector = ColorDetector(lower_limit, upper_limit)
 
     def init_detection_runner(self):
-        self.runner = DetectionRunner(self.app)
+        self.runner = DetectionRunner(self.app, )
         self.app.state.runner = self.runner
         
 
