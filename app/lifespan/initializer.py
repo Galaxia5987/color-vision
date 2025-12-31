@@ -32,10 +32,11 @@ class Initializer:
         self.runners: list[DetectionRunner] = []
         for camera_config in self.config.cameras:
             lower_limit, upper_limit = camera_config.detection.limits
+            min_area = camera_config.detection.min_area
             runner = DetectionRunner(
                     self.app, 
                     camera_config.name, 
-                    ColorDetector(lower_limit, upper_limit)
+                    ColorDetector(lower_limit, upper_limit, min_area)
                 )
             runner.start()
 

@@ -4,4 +4,5 @@ cameras:
     mask_stream_enabled: true
     detection:
       limits: [[0, 87, 83], [179, 172, 255]]
+      min_area: 500
   

@@ -9,9 +9,10 @@ from temp import DISABLED_STREAM_IMAGE
 logger = logging_config.get_logger(__name__)
 
 class ColorDetector:
-    def __init__(self, lower, upper) -> None:
+    def __init__(self, lower, upper, min_area) -> None:
         self.lower = np.array(lower)
         self.upper = np.array(upper)
+        self.min_area = min_area
 
         self.latest_frame = DISABLED_STREAM_IMAGE
         self.latest_masked_frame = DISABLED_STREAM_IMAGE
@@ -32,8 +33,8 @@ class ColorDetector:
         detected_objects = []
         for contour in contours:
             area = cv.contourArea(contour)
-            
-            if area > 500:
+
+            if area > self.min_area:
                 x, y, w, h = cv.boundingRect(contour)
                 
                 M = cv.moments(contour)
@@ -52,8 +53,7 @@ class ColorDetector:
         
         self.latest_masked_frame = mask
         self.latest_frame = frame
-
-        return detected_objects, mask
+        self.detections = detected_objects
     
     def _annotate_frame(self, frame, detected_objects):
         """Draw detections on the frame"""
