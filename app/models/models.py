@@ -1,25 +1,27 @@
-from xmlrpc.client import Boolean
+from typing import List, Tuple
 from pydantic import BaseModel
 
-class CameraConfig(BaseModel):
-    usb_index: int
-    detection_stream_enabled: Boolean
-    mask_stream_enabled: Boolean
-
 class Detection(BaseModel):
-    limits: tuple[list[int], list[int]]
+    limits: Tuple[List[int], List[int]]
 
-class RootConfig(BaseModel):
-    camera: CameraConfig
+class CameraConfig(BaseModel):
+    name: str
+    usb_index: int
+    detection_stream_enabled: bool
+    mask_stream_enabled: bool
     detection: Detection
 
+class RootConfig(BaseModel):
+    cameras: List[CameraConfig]
+
 default_config = RootConfig(
-    camera = CameraConfig(
-        usb_index=0,
-        detection_stream_enabled=True,
-        mask_stream_enabled=True
-    ),
-    detection=Detection(
-        limits=([61,48,43], [103,255,255])
-    )
+    cameras=[
+        CameraConfig(
+            name="someshit", # TODO
+            usb_index=0,
+            detection_stream_enabled=True,
+            mask_stream_enabled=True,
+            detection=Detection(limits=([61,48,43], [103,255,255]))
+        ),
+    ]
 )

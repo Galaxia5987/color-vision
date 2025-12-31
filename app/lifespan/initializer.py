@@ -28,7 +28,7 @@ class Initializer:
         self.init_detection_runner()
 
         # self.init_calibrator()
-        
+
         self.setup_stream_routes()
 
     def init_calibrator(self):
@@ -41,21 +41,22 @@ class Initializer:
         self.app.state.detector = ColorDetector(lower_limit, upper_limit)
 
     def init_detection_runner(self):
-        self.runner = DetectionRunner(self.app, )
-        self.app.state.runner = self.runner
-        
+        self.runners = []
+        for camera in self.config.cameras:
+            self.runners.append(DetectionRunner(self.app, camera.name))
+        self.app.state.runners = self.runners
 
     def setup_stream_routes(self):
         logger.info("Configuring stream routes", operation="reload_app")
 
-        def video(detection: bool):
-            if not self.runner:
+        def video(detection: bool, index):
+            if not self.runners[index]:
                 return DISABLED_STREAM_IMAGE
             img = None
             if detection:
-                img = self.runner.get_detection_jpeg()
+                img = self.runners[index].get_detection_jpeg()
             else:
-                img = self.runner.get_mask_jpeg()
+                img = self.runners[index].get_mask_jpeg()
             if img is None:
                 return DISABLED_STREAM_IMAGE
             return img
