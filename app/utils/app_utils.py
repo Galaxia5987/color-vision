@@ -5,6 +5,9 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import numpy as np
 
+from app.config import ConfigManager
+from app.models.models import CameraConfig
+
 
 def mount_frontend(app: FastAPI) -> None:
     """Mount the built Vue frontend if available."""
@@ -66,3 +69,12 @@ def generate_stream_disabled_image(width=640, height=480, text="Stream Disabled"
     )
 
     return image
+
+def get_camera_config_by_name(name: str) -> CameraConfig:
+    for cam in ConfigManager().get().cameras:
+        if cam.name == name:
+            return cam
+
+    raise KeyError(f"Camera config with name '{name}' not found")
+
+    

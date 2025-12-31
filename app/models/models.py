@@ -6,7 +6,6 @@ class Detection(BaseModel):
 
 class CameraConfig(BaseModel):
     name: str
-    usb_index: int
     detection_stream_enabled: bool
     mask_stream_enabled: bool
     detection: Detection
@@ -17,8 +16,7 @@ class RootConfig(BaseModel):
 default_config = RootConfig(
     cameras=[
         CameraConfig(
-            name="someshit", # TODO
-            usb_index=0,
+            name="someshit",
             detection_stream_enabled=True,
             mask_stream_enabled=True,
             detection=Detection(limits=([61,48,43], [103,255,255]))

@@ -1,3 +1,4 @@
+from pdb import run
 from fastapi import FastAPI
 import cv2 as cv
 
@@ -24,57 +25,62 @@ class Initializer:
         self.app.state.config = ConfigManager().get()
         self.config = self.app.state.config
 
-        self.init_detector()
-        self.init_detection_runner()
-
-        # self.init_calibrator()
-
+        self.init_detection_runners()
         self.setup_stream_routes()
 
-    def init_calibrator(self):
-        self.calibrator = ColorCalibrator(self.app.state.camera)
+    def init_detection_runners(self):
+        self.runners: list[DetectionRunner] = []
+        for camera_config in self.config.cameras:
+            lower_limit, upper_limit = camera_config.detection.limits
+            runner = DetectionRunner(
+                    self.app, 
+                    camera_config.name, 
+                    ColorDetector(lower_limit, upper_limit)
+                )
+            runner.start()
 
-    def init_detector(self):
-        limits_config = self.app.state.config.detection.limits
-        lower_limit = limits_config[0]
-        upper_limit = limits_config[1] 
-        self.app.state.detector = ColorDetector(lower_limit, upper_limit)
-
-    def init_detection_runner(self):
-        self.runners = []
-        for camera in self.config.cameras:
-            self.runners.append(DetectionRunner(self.app, camera.name))
+            self.runners.append(
+                runner
+            )
         self.app.state.runners = self.runners
 
     def setup_stream_routes(self):
         logger.info("Configuring stream routes", operation="reload_app")
 
-        def video(detection: bool, index):
-            if not self.runners[index]:
-                return DISABLED_STREAM_IMAGE
-            img = None
-            if detection:
-                img = self.runners[index].get_detection_jpeg()
-            else:
-                img = self.runners[index].get_mask_jpeg()
-            if img is None:
-                return DISABLED_STREAM_IMAGE
-            return img
+        def make_frame_source(runner: DetectionRunner, *, detection: bool):
+            def frame_source():
+                if not runner:
+                    return DISABLED_STREAM_IMAGE
 
-        def video_detections():
-            return video(False)
+                img = (
+                    runner.get_detection_jpeg()
+                    if detection
+                    else runner.get_mask_jpeg()
+                )
 
-        def video_masked():
-            return video(True)
+                return img or DISABLED_STREAM_IMAGE
 
-        streams.create_stream_route(self.app, "/detections_feed", video_detections)
-        streams.create_stream_route(self.app, "/masked_feed", video_masked)
+            return frame_source
+
+        for runner in self.runners:
+            streams.create_stream_route(
+                self.app,
+                f"/{runner.device_name}/detections_feed",
+                make_frame_source(runner, detection=True),
+            )
+
+            streams.create_stream_route(
+                self.app,
+                f"/{runner.device_name}/masked_feed",
+                make_frame_source(runner, detection=False),
+            )
 
         logger.info(
             "Stream routes configured successfully",
             operation="reload_app",
             status="success",
         )
+
 
     def stop(self):
         pass

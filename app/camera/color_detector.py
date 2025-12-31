@@ -55,7 +55,7 @@ class ColorDetector:
 
         return detected_objects, mask
     
-    def annotate_frame(self, frame, detected_objects):
+    def _annotate_frame(self, frame, detected_objects):
         """Draw detections on the frame"""
         annotated = frame.copy()
         
@@ -90,7 +90,7 @@ class ColorDetector:
         
         detections = self.detections
 
-        annotated_frame = self.annotate_frame(frame, detections)
+        annotated_frame = self._annotate_frame(frame, detections)
 
         return frames_to_jpeg_bytes(annotated_frame)
     
