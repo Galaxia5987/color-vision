@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import Button from 'primevue/button'
 import Divider from 'primevue/divider'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
@@ -7,14 +8,106 @@ import Panel from 'primevue/panel'
 import Slider from 'primevue/slider'
 import type { CameraOption } from '../scripts/dashboardData'
 import { processingModes } from '../scripts/dashboardData'
+import { saveConfig, updateCameraSettings } from '../scripts/api'
+import type { CameraConfig } from '../scripts/api'
 
-defineProps<{ camera?: CameraOption }>()
+const props = defineProps<{ camera?: CameraOption; cameraConfig?: CameraConfig | null }>()
+const emit = defineEmits<{ updated: [CameraConfig] }>()
 
 const processingMode = ref(processingModes[0]?.value ?? 'hsv')
 const exposure = ref(100)
 const hueRange = ref<[number, number]>([0, 360])
 const saturationRange = ref<[number, number]>([0, 100])
 const valueRange = ref<[number, number]>([0, 100])
+const isUpdating = ref(false)
+const isSaving = ref(false)
+const statusMessage = ref('')
+const statusTone = ref<'success' | 'error' | ''>('')
+
+const canApply = computed(() => Boolean(props.camera && props.cameraConfig))
+
+const toHueBackend = (value: number) => Math.round((value / 360) * 180)
+const toSvBackend = (value: number) => Math.round((value / 100) * 255)
+const fromHueBackend = (value: number) => Math.round((value / 180) * 360)
+const fromSvBackend = (value: number) => Math.round((value / 255) * 100)
+
+const setStatus = (message: string, tone: 'success' | 'error') => {
+  statusMessage.value = message
+  statusTone.value = tone
+}
+
+const clearStatus = () => {
+  statusMessage.value = ''
+  statusTone.value = ''
+}
+
+const applySettings = async () => {
+  if (!props.camera || !props.cameraConfig || isUpdating.value) {
+    return
+  }
+
+  isUpdating.value = true
+  clearStatus()
+  try {
+    const lower = [
+      toHueBackend(hueRange.value[0]),
+      toSvBackend(saturationRange.value[0]),
+      toSvBackend(valueRange.value[0]),
+    ]
+    const upper = [
+      toHueBackend(hueRange.value[1]),
+      toSvBackend(saturationRange.value[1]),
+      toSvBackend(valueRange.value[1]),
+    ]
+    const update: CameraConfig = {
+      ...props.cameraConfig,
+      exposure: exposure.value,
+      detection: {
+        ...props.cameraConfig.detection,
+        limits: [lower, upper],
+      },
+    }
+    const response = await updateCameraSettings(props.camera.id, update)
+    emit('updated', response.camera)
+    setStatus('Camera updated.', 'success')
+  } catch {
+    setStatus('Failed to update camera.', 'error')
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+const persistConfig = async () => {
+  if (isSaving.value) {
+    return
+  }
+  isSaving.value = true
+  clearStatus()
+  try {
+    await saveConfig()
+    setStatus('Config saved to disk.', 'success')
+  } catch {
+    setStatus('Failed to save config.', 'error')
+  } finally {
+    isSaving.value = false
+  }
+}
+
+watch(
+  () => props.cameraConfig,
+  (config) => {
+    if (!config) {
+      return
+    }
+    exposure.value = config.exposure
+    const [lower, upper] = config.detection.limits
+    hueRange.value = [fromHueBackend(lower[0] ?? 0), fromHueBackend(upper[0] ?? 0)]
+    saturationRange.value = [fromSvBackend(lower[1] ?? 0), fromSvBackend(upper[1] ?? 0)]
+    valueRange.value = [fromSvBackend(lower[2] ?? 0), fromSvBackend(upper[2] ?? 0)]
+    clearStatus()
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -60,6 +153,18 @@ const valueRange = ref<[number, number]>([0, 100])
           <span class="value">{{ valueRange[0] }}-{{ valueRange[1] }}%</span>
         </div>
       </div>
+      <Divider />
+      <p v-if="statusMessage" class="status" :class="statusTone">{{ statusMessage }}</p>
+      <div class="actions">
+        <Button
+          label="Apply"
+          severity="primary"
+          :loading="isUpdating"
+          :disabled="!canApply"
+          @click="applySettings"
+        />
+        <Button label="Save Config" outlined :loading="isSaving" @click="persistConfig" />
+      </div>
     </div>
   </Panel>
 </template>
@@ -92,5 +197,25 @@ const valueRange = ref<[number, number]>([0, 100])
 .value {
   font-weight: 600;
   color: var(--accent-strong);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status.success {
+  color: #177a3d;
+}
+
+.status.error {
+  color: #b22121;
 }
 </style>

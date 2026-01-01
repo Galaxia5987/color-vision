@@ -9,6 +9,7 @@ from app.camera.color_calibrator import ColorCalibrator
 from app.camera.color_detector import ColorDetector
 from app.config import ConfigManager
 from app.utils.app_utils import generate_stream_disabled_image
+from app.pipeline.pipeline_runner import PipelineRunner, PassthroughPipeline
 
 from app.utils.decorators import singleton
 
@@ -26,6 +27,7 @@ class Initializer:
         self.config = self.app.state.config
 
         self.init_detection_runners()
+        self.init_pipeline_runners()
         self.setup_stream_routes()
 
     def init_detection_runners(self):
@@ -66,13 +68,13 @@ class Initializer:
         for runner in self.runners:
             streams.create_stream_route(
                 self.app,
-                f"/{runner.device_name}/detections_feed",
+                f"/{runner.device_name}/processed",
                 make_frame_source(runner, detection=True),
             )
 
             streams.create_stream_route(
                 self.app,
-                f"/{runner.device_name}/masked_feed",
+                f"/{runner.device_name}/raw",
                 make_frame_source(runner, detection=False),
             )
 
@@ -82,6 +84,21 @@ class Initializer:
             status="success",
         )
 
+    def init_pipeline_runners(self):
+        self.pipeline_runners: list[PipelineRunner] = []
+        for runner in self.runners:
+            pipeline_runner = PipelineRunner(
+                runner.device_name,
+                PassthroughPipeline(),
+                runner.get_latest_frame,
+            )
+            pipeline_runner.start()
+            self.pipeline_runners.append(pipeline_runner)
+        self.app.state.pipeline_runners = self.pipeline_runners
+
 
     def stop(self):
-        pass
+        for pipeline_runner in getattr(self, "pipeline_runners", []):
+            pipeline_runner.stop_sync()
+        for runner in getattr(self, "runners", []):
+            runner.stop_sync()

@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Tag from 'primevue/tag'
 import type { CameraOption, StreamDefinition } from '../scripts/dashboardData'
+import { getStreamUrl } from '../scripts/api'
 
 const props = defineProps<{ camera: CameraOption; stream: StreamDefinition }>()
 const cameraLabel = () => props.camera.id
+const streamUrl = computed(() => getStreamUrl(props.camera.id, props.stream.id))
 </script>
 
 <template>
   <div class="stream-card">
     <!-- Stream as full background -->
     <img
-      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyDAWNyVnSO8tayCJE9cuzXmrJugNzUtIG1Q&s"
+      :src="streamUrl"
       alt="MJPEG stream"
       class="stream-bg"
     />

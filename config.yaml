@@ -1,8 +1,14 @@
 cameras:
-  - name: "test"
-    detection_stream_enabled: true
-    mask_stream_enabled: true
-    detection:
-      limits: [[0, 87, 83], [179, 172, 255]]
-      min_area: 500
-  
+- detection:
+    limits:
+    - - 54
+      - 117
+      - 33
+    - - 88
+      - 222
+      - 196
+    min_area: 500
+  detection_stream_enabled: true
+  exposure: 100
+  mask_stream_enabled: true
+  name: color-01

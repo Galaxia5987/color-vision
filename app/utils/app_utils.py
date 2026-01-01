@@ -25,8 +25,8 @@ def mount_frontend(app: FastAPI) -> None:
         )
 
         # Catch-all route for Vue Router (history mode)
-        @app.get("/{full_path:path}")
-        async def serve_vue_app(full_path: str):
+        @app.get("/")
+        async def serve_vue_app():
             return FileResponse(index_html)
 
     else:

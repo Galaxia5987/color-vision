@@ -2,7 +2,7 @@
 import StreamPanel from './StreamPanel.vue'
 import type { CameraOption, StreamDefinition } from '../scripts/dashboardData'
 
-defineProps<{ camera?: CameraOption; streams: StreamDefinition[] }>()
+defineProps<{ camera: CameraOption; streams: StreamDefinition[] }>()
 </script>
 
 <template>

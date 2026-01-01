@@ -23,6 +23,10 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // Proxy API calls to FastAPI
+      '/api': {
+        target: 'http://localhost:5806',
+        changeOrigin: true,
+      },
       '/streams': {
         target: 'http://localhost:5806',
         changeOrigin: true,

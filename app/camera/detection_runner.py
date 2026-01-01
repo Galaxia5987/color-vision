@@ -50,6 +50,9 @@ class DetectionRunner(AsyncLoopBase):
         if self.camera_config.mask_stream_enabled:
             return self.detector.get_masked_frame()
         return None
+
+    def get_latest_frame(self):
+        return self.detector.latest_frame
     
     @override
     def on_stop(self) -> None:

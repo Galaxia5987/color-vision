@@ -10,6 +10,7 @@ class CameraConfig(BaseModel):
     detection_stream_enabled: bool
     mask_stream_enabled: bool
     detection: Detection
+    exposure: int = 100
 
 class RootConfig(BaseModel):
     cameras: List[CameraConfig]
