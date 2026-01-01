@@ -10,6 +10,7 @@ from app.logging_config import get_logger
 from app.models.models import CameraConfig
 from app.utils.app_utils import get_camera_config_by_name
 from app.utils.async_loop_base import AsyncLoopBase
+from app.utils.cv_utils import exposure_percentage_to_value
 from app.utils.device_utils import resolve_device
 
 logger = get_logger(__name__)
@@ -31,6 +32,39 @@ class DetectionRunner(AsyncLoopBase):
         self.camera_config: CameraConfig = get_camera_config_by_name(device_name)
         self.detector = detector
         self.app = app
+        self._apply_exposure(self.camera_config.exposure)
+
+    def _apply_exposure(self, exposure: int) -> bool:
+        """Apply exposure setting to camera.
+        
+        Returns:
+            bool: True if exposure was successfully applied, False otherwise.
+        """
+        if self.cap is None or not self.cap.isOpened():
+            logger.error("Cannot apply exposure: camera not initialized")
+            return False
+    
+        # Apply exposure value
+        applied = self.cap.set(cv2.CAP_PROP_EXPOSURE, exposure_percentage_to_value(exposure))
+        if not applied:
+            logger.warning(
+                "Camera exposure update rejected by driver",
+                extra={"exposure": exposure, "device": self.device_name}
+            )
+        
+        return applied
+
+    def update_exposure(self, exposure: int) -> bool:
+        """Update camera exposure setting.
+        
+        Args:
+            exposure: Exposure value (camera-specific range, typically negative)
+            
+        Returns:
+            bool: True if exposure was successfully applied.
+        """
+        self.camera_config.exposure = exposure
+        return self._apply_exposure(exposure)
     
     @override
     def on_iteration(self):

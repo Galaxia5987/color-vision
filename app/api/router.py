@@ -58,6 +58,7 @@ async def update_camera_settings(
         runner.detector.upper = np.array(upper)
         runner.detector.min_area = update.detection.min_area
         runner.detector.max_area = update.detection.max_area
+        runner.update_exposure(update.exposure)
 
     request.app.state.config = config
 
