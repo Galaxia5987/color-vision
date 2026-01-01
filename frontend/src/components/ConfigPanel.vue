@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import Button from 'primevue/button'
 import Divider from 'primevue/divider'
 import Dropdown from 'primevue/dropdown'
+import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Panel from 'primevue/panel'
 import Slider from 'primevue/slider'
@@ -19,6 +20,8 @@ const exposure = ref(100)
 const hueRange = ref<[number, number]>([0, 360])
 const saturationRange = ref<[number, number]>([0, 100])
 const valueRange = ref<[number, number]>([0, 100])
+const minArea = ref<number | null>(0)
+const maxArea = ref<number | null>(0)
 const isUpdating = ref(false)
 const isSaving = ref(false)
 const statusMessage = ref('')
@@ -65,6 +68,8 @@ const applySettings = async () => {
       detection: {
         ...props.cameraConfig.detection,
         limits: [lower, upper],
+        min_area: Math.max(0, Math.round(minArea.value ?? 0)),
+        max_area: Math.max(0, Math.round(maxArea.value ?? 0)),
       },
     }
     const response = await updateCameraSettings(props.camera.id, update)
@@ -104,6 +109,8 @@ watch(
     hueRange.value = [fromHueBackend(lower[0] ?? 0), fromHueBackend(upper[0] ?? 0)]
     saturationRange.value = [fromSvBackend(lower[1] ?? 0), fromSvBackend(upper[1] ?? 0)]
     valueRange.value = [fromSvBackend(lower[2] ?? 0), fromSvBackend(upper[2] ?? 0)]
+    minArea.value = config.detection.min_area ?? 0
+    maxArea.value = config.detection.max_area ?? 0
     clearStatus()
   },
   { immediate: true }
@@ -154,6 +161,15 @@ watch(
         </div>
       </div>
       <Divider />
+      <div class="field">
+        <label class="label">Min Area</label>
+        <InputNumber v-model="minArea" :min="0" :use-grouping="false" />
+      </div>
+      <div class="field">
+        <label class="label">Max Area</label>
+        <InputNumber v-model="maxArea" :min="0" :use-grouping="false" />
+      </div>
+      <Divider />
       <p v-if="statusMessage" class="status" :class="statusTone">{{ statusMessage }}</p>
       <div class="actions">
         <Button
@@ -198,6 +214,7 @@ watch(
   font-weight: 600;
   color: var(--accent-strong);
 }
+
 
 .actions {
   display: flex;

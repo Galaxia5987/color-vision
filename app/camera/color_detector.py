@@ -9,10 +9,11 @@ from temp import DISABLED_STREAM_IMAGE
 logger = logging_config.get_logger(__name__)
 
 class ColorDetector:
-    def __init__(self, lower, upper, min_area) -> None:
+    def __init__(self, lower, upper, min_area, max_area) -> None:
         self.lower = np.array(lower)
         self.upper = np.array(upper)
         self.min_area = min_area
+        self.max_area = max_area
 
         self.latest_frame = DISABLED_STREAM_IMAGE
         self.latest_masked_frame = DISABLED_STREAM_IMAGE
@@ -34,22 +35,22 @@ class ColorDetector:
         for contour in contours:
             area = cv.contourArea(contour)
 
-            if area > self.min_area:
-                x, y, w, h = cv.boundingRect(contour)
-                
-                M = cv.moments(contour)
-                if M["m00"] != 0:
-                    cx = int(M["m10"] / M["m00"])
-                    cy = int(M["m01"] / M["m00"])
-                else:
-                    cx, cy = x + w//2, y + h//2
-                
-                detected_objects.append({
-                    'center': (cx, cy),
-                    'bbox': (x, y, w, h),
-                    'area': area,
-                    'contour': contour
-                })
+            if area > self.min_area and area <= self.max_area:
+                    x, y, w, h = cv.boundingRect(contour)
+                    
+                    M = cv.moments(contour)
+                    if M["m00"] != 0:
+                        cx = int(M["m10"] / M["m00"])
+                        cy = int(M["m01"] / M["m00"])
+                    else:
+                        cx, cy = x + w//2, y + h//2
+                    
+                    detected_objects.append({
+                        'center': (cx, cy),
+                        'bbox': (x, y, w, h),
+                        'area': area,
+                        'contour': contour
+                    })
         
         self.latest_masked_frame = mask
         self.latest_frame = frame

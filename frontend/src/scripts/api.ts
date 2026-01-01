@@ -61,6 +61,7 @@ const requestText = async (path: string, options: RequestInit = {}): Promise<str
 export type Detection = {
   limits: [number[], number[]]
   min_area: number
+  max_area: number
 }
 
 export type CameraConfig = {

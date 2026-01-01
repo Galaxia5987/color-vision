@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class Detection(BaseModel):
     limits: Tuple[List[int], List[int]]
     min_area: int
+    max_area: int
 
 class CameraConfig(BaseModel):
     name: str
@@ -23,7 +24,8 @@ default_config = RootConfig(
             mask_stream_enabled=True,
             detection=Detection(
                 limits=([61,48,43], [103,255,255]),
-                min_area=500
+                min_area=500,
+                max_area=100000
             )
         ),
     ]
