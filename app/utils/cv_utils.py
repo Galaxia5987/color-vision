@@ -10,8 +10,8 @@ def frames_to_jpeg_bytes(frame, resolution=(640, 480)):
 
 def exposure_percentage_to_value(
     percentage: int, 
-    min_exposure: float = -13.0, 
-    max_exposure: float = -1.0
+    min_exposure: float = 0.0, 
+    max_exposure: float = 4.0
 ) -> float:
     """Convert 0-100 percentage to camera exposure value.
     
@@ -36,4 +36,4 @@ def exposure_percentage_to_value(
     
     # Linear interpolation
     exposure = min_exposure + (percentage / 100.0) * (max_exposure - min_exposure)
-    return exposure
+    return 10**exposure

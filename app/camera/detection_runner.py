@@ -45,7 +45,9 @@ class DetectionRunner(AsyncLoopBase):
             return False
     
         # Apply exposure value
-        applied = self.cap.set(cv2.CAP_PROP_EXPOSURE, exposure_percentage_to_value(exposure))
+        _exposure = exposure_percentage_to_value(exposure)
+        applied = self.cap.set(cv2.CAP_PROP_EXPOSURE, _exposure)
+        logging.info(f"Applying exposure {_exposure}")
         if not applied:
             logger.warning(
                 "Camera exposure update rejected by driver",

@@ -7,9 +7,9 @@ cameras:
     - - 88
       - 222
       - 196
-    min_area: 500
     max_area: 100000
+    min_area: 500
   detection_stream_enabled: true
-  exposure: 100
+  exposure: 87
   mask_stream_enabled: true
   name: color-01

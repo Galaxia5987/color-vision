@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 import uvicorn
 
+from app import logging_config
 from app.lifespan.app_lifespan import app_lifespan
 from app.camera.streams import router as streams_router
 from app.api.router import router as api_router
 from app.utils.app_utils import mount_frontend
+
+logging_config.setup_logging()
 
 app = FastAPI(
     title="Color Vision",
