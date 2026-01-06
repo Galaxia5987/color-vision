@@ -10,8 +10,7 @@ from app.logging_config import get_logger
 from app.models.models import CameraConfig
 from app.utils.app_utils import get_camera_config_by_name
 from app.utils.async_loop_base import AsyncLoopBase
-from app.utils.cv_utils import exposure_percentage_to_value
-from app.utils.device_utils import get_exposure_range, resolve_device, set_auto_exposure
+from app.utils.device_utils import resolve_device, set_auto_exposure
 import platform
 
 logger = get_logger(__name__)
@@ -25,11 +24,9 @@ class DetectionRunner(AsyncLoopBase):
         if platform.system() == "Windows":
             logging.warning("\nUSING SETTINGS FOR WINDOWS DEVELOPMENT!\n")
             self.cap = cv2.VideoCapture(0)
-            self.exposure_range = (10,600)
         else:
             self.device_path = resolve_device(device_name)
             self.cap = cv2.VideoCapture(self.device_path)
-            self.exposure_range = get_exposure_range(self.device_path)
             # set_auto_exposure(self.device_path, False)
             
         
@@ -44,10 +41,9 @@ class DetectionRunner(AsyncLoopBase):
             logger.error("Cannot apply exposure: camera not initialized")
             return False
     
-        # Apply exposure value
-        _exposure = exposure_percentage_to_value(exposure, *self.exposure_range)
-        applied = self.cap.set(cv2.CAP_PROP_EXPOSURE, _exposure)
-        logging.info(f"Applying exposure {_exposure}")
+        # Apply exposure value directly.
+        applied = self.cap.set(cv2.CAP_PROP_EXPOSURE, float(exposure))
+        logging.info(f"Applying exposure {exposure}")
         if not applied:
             logger.warning(
                 "Camera exposure update rejected by driver",

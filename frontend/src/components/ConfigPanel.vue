@@ -138,11 +138,8 @@ watch(
       </div>
       <Divider />
       <div class="field">
-        <label class="label">Exposure</label>
-        <div class="range-row">
-          <Slider v-model="exposure" :min="0" :max="100" />
-          <span class="value">{{ exposure }}%</span>
-        </div>
+        <label class="label">Exposure Value</label>
+        <InputNumber v-model="exposure" :use-grouping="false" />
       </div>
       <Divider />
       <div class="field">

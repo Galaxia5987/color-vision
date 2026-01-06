@@ -10,7 +10,7 @@ cameras:
     max_area: 100000
     min_area: 500
   detection_stream_enabled: true
-  exposure: 31
+  exposure: 1000
   mask_stream_enabled: true
   name: usb-CN089W678LG004CMF62AA01_Integrated_Webcam_FHD-video-index0
 - detection:
