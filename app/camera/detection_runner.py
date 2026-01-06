@@ -27,8 +27,6 @@ class DetectionRunner(AsyncLoopBase):
         else:
             self.device_path = resolve_device(device_name)
             self.cap = cv2.VideoCapture(self.device_path)
-            # set_auto_exposure(self.device_path, False)
-            
         
         self.camera_config: CameraConfig = get_camera_config_by_name(device_name)
         self.detector = detector
