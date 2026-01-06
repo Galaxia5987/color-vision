@@ -5,7 +5,7 @@ import type { CameraOption, StreamDefinition } from '../scripts/dashboardData'
 import { getStreamUrl } from '../scripts/api'
 
 const props = defineProps<{ camera: CameraOption; stream: StreamDefinition }>()
-const cameraLabel = () => props.camera.id
+const cameraLabel = () => props.camera.displayName
 const streamUrl = computed(() => getStreamUrl(props.camera.id, props.stream.id))
 </script>
 

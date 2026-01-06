@@ -1,5 +1,5 @@
 import numpy as np
-from fastapi import APIRouter, Body, FastAPI, HTTPException, Request
+from fastapi import APIRouter, Body, FastAPI, HTTPException, Query, Request
 
 from app.config import ConfigManager, ConfigError
 from app.lifespan.initializer import Initializer
@@ -35,13 +35,16 @@ async def list_available_cameras() -> list[str]:
 
 @router.put("/cameras/add/{camera_name}")
 async def add_camera(
-    camera_name: str
+    camera_name: str,
+    alias: str | None = Query(default=None)
 ) -> str:
     if camera_name not in list_devices():
         raise HTTPException(status_code=404, detail=f"Camera {camera_name} not found")
+    alias = alias.strip() if alias else None
     config = ConfigManager().get()
     camera_config = CameraConfig(
             name=camera_name,
+            alias=alias,
             mask_stream_enabled=True,
             detection_stream_enabled=True,
             detection=Detection(
@@ -79,6 +82,7 @@ async def update_camera_settings(
     camera_config.detection_stream_enabled = update.detection_stream_enabled
     camera_config.mask_stream_enabled = update.mask_stream_enabled
     camera_config.exposure = update.exposure
+    camera_config.alias = update.alias
     camera_config.detection.limits = update.detection.limits
     camera_config.detection.min_area = update.detection.min_area
     camera_config.detection.max_area = update.detection.max_area

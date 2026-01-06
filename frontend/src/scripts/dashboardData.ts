@@ -2,6 +2,7 @@ export type CameraStatus = 'online' | 'offline'
 
 export type CameraOption = {
   id: string
+  displayName: string
   status: CameraStatus
 }
 
@@ -30,10 +31,12 @@ export type DangerAction = {
 export const cameraOptions: CameraOption[] = [
   {
     id: 'color-01',
+    displayName: 'color-01',
     status: 'online',
   },
   {
     id: 'color-02',
+    displayName: 'color-02',
     status: 'offline',
   }
 ]

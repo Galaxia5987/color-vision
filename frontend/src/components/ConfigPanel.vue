@@ -130,7 +130,7 @@ watch(
     <div class="panel-body">
       <div class="field">
         <label class="label">Camera</label>
-        <InputText :value="camera?.id ?? 'Not selected'" disabled />
+        <InputText :value="camera?.displayName ?? 'Not selected'" disabled />
       </div>
       <div class="field">
         <label class="label">Pipeline</label>

@@ -66,6 +66,7 @@ export type Detection = {
 
 export type CameraConfig = {
   name: string
+  alias?: string | null
   detection_stream_enabled: boolean
   mask_stream_enabled: boolean
   detection: Detection
@@ -122,5 +123,11 @@ export const getStreamUrl = (cameraName: string, streamName: string) =>
 export const listDevices = () =>
   requestJson<Array<string>>("/api/available_cameras")
 
-export const addCamera = (cameraName: string) =>
-  requestText(`/api/cameras/add/${cameraName}`, {method: 'PUT'})
+export const addCamera = (cameraName: string, alias?: string) => {
+  const params = new URLSearchParams()
+  if (alias && alias.trim()) {
+    params.set('alias', alias.trim())
+  }
+  const suffix = params.toString() ? `?${params.toString()}` : ''
+  return requestText(`/api/cameras/add/${cameraName}${suffix}`, { method: 'PUT' })
+}

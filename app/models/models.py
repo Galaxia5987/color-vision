@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from pydantic import BaseModel
 
 class Detection(BaseModel):
@@ -8,6 +8,7 @@ class Detection(BaseModel):
 
 class CameraConfig(BaseModel):
     name: str
+    alias: Optional[str] = None
     detection_stream_enabled: bool
     mask_stream_enabled: bool
     detection: Detection
@@ -20,6 +21,7 @@ default_config = RootConfig(
     cameras=[
         CameraConfig(
             name="someshit",
+            alias=None,
             detection_stream_enabled=True,
             mask_stream_enabled=True,
             detection=Detection(

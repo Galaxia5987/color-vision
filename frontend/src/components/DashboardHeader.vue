@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Dropdown from 'primevue/dropdown'
+import InputText from 'primevue/inputtext'
 import Tag from 'primevue/tag'
 import type { CameraOption } from '../scripts/dashboardData'
 import { statusSeverityMap } from '../scripts/dashboardData'
@@ -13,12 +14,14 @@ const showDialog = ref<boolean>(false)
 const devices = ref<string[]>([])
 const loading = ref<boolean>(false)
 const selectedDevice = ref<string | null>(null)
+const aliasInput = ref<string>('')
 
 async function openDialog() {
   showDialog.value = true
   loading.value = true
   devices.value = []
   selectedDevice.value = null
+  aliasInput.value = ''
   try {
     devices.value = await listDevices()
   } catch {
@@ -31,7 +34,7 @@ async function openDialog() {
 async function confirmSelection() {
   if (selectedDevice.value) {
     showDialog.value = false
-    const status = await addCamera(selectedDevice.value)
+    const status = await addCamera(selectedDevice.value, aliasInput.value)
     if(status != "\"OK\""){
       alert(`Failed to add camera! ${status}`)
       return
@@ -48,7 +51,7 @@ async function confirmSelection() {
       <h1>Vision Dashboard</h1>
       <div class="meta">
         <span v-if="activeCamera" class="meta-label">Active camera:</span>
-        <span v-if="activeCamera" class="meta-value">{{ activeCamera.id }}</span>
+        <span v-if="activeCamera" class="meta-value">{{ activeCamera.displayName }}</span>
         <Tag
           v-if="activeCamera"
           :value="activeCamera.status"
@@ -77,6 +80,12 @@ async function confirmSelection() {
               optionLabel=""
               style="width: 100%;"
             />
+            <div style="margin-top: 1rem;">
+              <label for="camera-alias" style="display: block; font-weight: 600; margin-bottom: 0.35rem;">
+                Alias (optional)
+              </label>
+              <InputText id="camera-alias" v-model="aliasInput" placeholder="e.g. Front Dock" style="width: 100%;" />
+            </div>
           </div>
         </div>
       </Dialog>

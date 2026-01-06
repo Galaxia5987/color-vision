@@ -25,7 +25,7 @@ const setActive = (cameraId: string) => {
     >
       <template #title>
         <div class="camera-title">
-          <span>{{ camera.id }}</span>
+          <span>{{ camera.displayName }}</span>
           <Tag :value="camera.status" :severity="statusSeverityMap[camera.status]" />
         </div>
       </template>

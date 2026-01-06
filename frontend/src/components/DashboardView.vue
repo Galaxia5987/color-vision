@@ -28,6 +28,7 @@ const refreshCameras = async () => {
     cameraConfigs.value = data.cameras
     cameras.value = data.cameras.map((camera) => ({
       id: camera.name,
+      displayName: camera.alias ?? camera.name,
       status: 'online',
     }))
     if (!cameras.value.find((camera) => camera.id === activeCameraId.value)) {
