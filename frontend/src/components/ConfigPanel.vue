@@ -75,8 +75,8 @@ const applySettings = async () => {
         min_area: Math.max(0, Math.round(minArea.value ?? 0)),
         max_area: Math.max(0, Math.round(maxArea.value ?? 0)),
       },
-      detection_stream_enabled: enableRawFeed.value, 
-      mask_stream_enabled: enableTargetFeed.value,
+      mask_stream_enabled: enableRawFeed.value,
+      detection_stream_enabled: enableTargetFeed.value,
     }
     const response = await updateCameraSettings(props.camera.id, update)
     emit('updated', response.camera)
@@ -117,7 +117,7 @@ watch(
     valueRange.value = [fromSvBackend(lower[2] ?? 0), fromSvBackend(upper[2] ?? 0)]
     minArea.value = config.detection.min_area ?? 0
     maxArea.value = config.detection.max_area ?? 0
-    enableRawFeed.value = config.detection_stream_enabled ?? false
+    enableRawFeed.value = config.mask_stream_enabled ?? false
     enableTargetFeed.value = config.detection_stream_enabled ?? false
     clearStatus()
   },

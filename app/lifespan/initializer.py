@@ -15,7 +15,7 @@ from app.utils.decorators import singleton
 
 logger = get_logger(__name__)
 
-DISABLED_STREAM_IMAGE = (
+DISABLED_STREAM_IMAGE_BYTES = (
     generate_stream_disabled_image()
 ) 
 
@@ -54,7 +54,7 @@ class Initializer:
         def make_frame_source(runner: DetectionRunner, *, detection: bool):
             def frame_source():
                 if not runner:
-                    return DISABLED_STREAM_IMAGE
+                    return DISABLED_STREAM_IMAGE_BYTES
 
                 img = (
                     runner.get_detection_jpeg()
@@ -62,7 +62,7 @@ class Initializer:
                     else runner.get_mask_jpeg()
                 )
 
-                return img or DISABLED_STREAM_IMAGE
+                return img or DISABLED_STREAM_IMAGE_BYTES
 
             return frame_source
 

@@ -7,6 +7,7 @@ import numpy as np
 
 from app.config import ConfigManager
 from app.models.models import CameraConfig
+from app.utils.cv_utils import frames_to_jpeg_bytes
 
 
 def mount_frontend(app: FastAPI) -> None:
@@ -68,7 +69,7 @@ def generate_stream_disabled_image(width=640, height=480, text="Stream Disabled"
         lineType=cv2.LINE_AA,
     )
 
-    return image
+    return frames_to_jpeg_bytes(image)
 
 def get_camera_config_by_name(name: str) -> CameraConfig:
     for cam in ConfigManager().get().cameras:

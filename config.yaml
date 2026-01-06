@@ -9,7 +9,7 @@ cameras:
       - 196
     max_area: 100000
     min_area: 500
-  detection_stream_enabled: false
+  detection_stream_enabled: true
   exposure: 87
-  mask_stream_enabled: false
+  mask_stream_enabled: true
   name: big-color
