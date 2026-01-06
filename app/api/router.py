@@ -33,6 +33,7 @@ async def update_camera_settings(
 ) -> dict:
     config = ConfigManager().get()
     camera_config = _get_camera_config(config, camera_name)
+    print(update.model_dump())
 
     if camera_config is None:
         raise HTTPException(status_code=404, detail="Camera not found")

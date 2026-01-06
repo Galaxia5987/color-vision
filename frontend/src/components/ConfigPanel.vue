@@ -4,6 +4,7 @@ import Button from 'primevue/button'
 import Divider from 'primevue/divider'
 import Dropdown from 'primevue/dropdown'
 import InputNumber from 'primevue/inputnumber'
+import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
 import Panel from 'primevue/panel'
 import Slider from 'primevue/slider'
@@ -22,6 +23,9 @@ const saturationRange = ref<[number, number]>([0, 100])
 const valueRange = ref<[number, number]>([0, 100])
 const minArea = ref<number | null>(0)
 const maxArea = ref<number | null>(0)
+const enableRawFeed = ref<boolean>(false)
+const enableTargetFeed = ref<boolean>(false)
+
 const isUpdating = ref(false)
 const isSaving = ref(false)
 const statusMessage = ref('')
@@ -71,6 +75,8 @@ const applySettings = async () => {
         min_area: Math.max(0, Math.round(minArea.value ?? 0)),
         max_area: Math.max(0, Math.round(maxArea.value ?? 0)),
       },
+      detection_stream_enabled: enableRawFeed.value, 
+      mask_stream_enabled: enableTargetFeed.value,
     }
     const response = await updateCameraSettings(props.camera.id, update)
     emit('updated', response.camera)
@@ -111,6 +117,8 @@ watch(
     valueRange.value = [fromSvBackend(lower[2] ?? 0), fromSvBackend(upper[2] ?? 0)]
     minArea.value = config.detection.min_area ?? 0
     maxArea.value = config.detection.max_area ?? 0
+    enableRawFeed.value = config.detection_stream_enabled ?? false
+    enableTargetFeed.value = config.detection_stream_enabled ?? false
     clearStatus()
   },
   { immediate: true }
@@ -168,6 +176,15 @@ watch(
       <div class="field">
         <label class="label">Max Area</label>
         <InputNumber v-model="maxArea" :min="0" :use-grouping="false" />
+      </div>
+      <Divider />
+      <div class="field">
+        <label class="label">Enable Raw Feed</label>
+        <Checkbox v-model="enableRawFeed" :binary="true" />
+      </div>
+      <div class="field">
+        <label class="label">Enable Processed Feed</label>
+        <Checkbox v-model="enableTargetFeed" :binary="true" />
       </div>
       <Divider />
       <p v-if="statusMessage" class="status" :class="statusTone">{{ statusMessage }}</p>
