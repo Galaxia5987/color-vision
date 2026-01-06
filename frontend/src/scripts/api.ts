@@ -118,3 +118,9 @@ export const getStreamsHome = () => requestText('/streams/')
 
 export const getStreamUrl = (cameraName: string, streamName: string) =>
   apiUrl(`/streams/${encodeURIComponent(cameraName)}/${encodeURIComponent(streamName)}`)
+
+export const listDevices = () =>
+  requestJson<Array<string>>("/api/available_cameras")
+
+export const addCamera = (cameraName: string) =>
+  requestText(`/api/cameras/add/${cameraName}`, {method: 'PUT'})

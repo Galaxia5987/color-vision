@@ -1,10 +1,44 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import Dropdown from 'primevue/dropdown'
 import Tag from 'primevue/tag'
 import type { CameraOption } from '../scripts/dashboardData'
 import { statusSeverityMap } from '../scripts/dashboardData'
+import { ref } from 'vue';
+import { addCamera, listDevices } from '@/scripts/api'
 
 defineProps<{ activeCamera?: CameraOption }>()
+const showDialog = ref<boolean>(false)
+const devices = ref<string[]>([])
+const loading = ref<boolean>(false)
+const selectedDevice = ref<string | null>(null)
+
+async function openDialog() {
+  showDialog.value = true
+  loading.value = true
+  devices.value = []
+  selectedDevice.value = null
+  try {
+    devices.value = await listDevices()
+  } catch {
+    devices.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+async function confirmSelection() {
+  if (selectedDevice.value) {
+    showDialog.value = false
+    const status = await addCamera(selectedDevice.value)
+    if(status != "\"OK\""){
+      alert(`Failed to add camera! ${status}`)
+      return
+    }
+    window.dispatchEvent(new CustomEvent('reload-cameras'))
+  }
+}
 </script>
 
 <template>
@@ -24,7 +58,28 @@ defineProps<{ activeCamera?: CameraOption }>()
       </div>
     </div>
     <div class="header-actions">
-      <Button label="Add Camera" severity="primary" outlined />
+      <Button label="Add Camera" severity="primary" outlined @click="openDialog" />
+      <Dialog header="Devices" v-model:visible="showDialog" modal :closable="true">
+        <template #footer>
+          <Button label="Close" text @click="showDialog = false" />
+          <Button label="Okay" severity="primary" @click="confirmSelection" :disabled="!selectedDevice" />
+        </template>
+
+        <div style="min-width: 320px;">
+          <p v-if="loading">Loading devices…</p>
+          <p v-else-if="devices && devices.length === 0">No devices found.</p>
+          <div v-else>
+            <p>Please choose a camera:</p>
+            <Dropdown
+              v-model="selectedDevice"
+              :options="devices"
+              placeholder="Select a device"
+              optionLabel=""
+              style="width: 100%;"
+            />
+          </div>
+        </div>
+      </Dialog>
     </div>
   </header>
 </template>

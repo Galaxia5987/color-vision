@@ -11,7 +11,8 @@ from app.models.models import CameraConfig
 from app.utils.app_utils import get_camera_config_by_name
 from app.utils.async_loop_base import AsyncLoopBase
 from app.utils.cv_utils import exposure_percentage_to_value
-from app.utils.device_utils import resolve_device
+from app.utils.device_utils import get_exposure_range, resolve_device, set_auto_exposure
+import platform
 
 logger = get_logger(__name__)
 
@@ -21,13 +22,16 @@ class DetectionRunner(AsyncLoopBase):
         
         self.device_name = device_name
 
-        # LINUX Settings
-        # self.device_path = resolve_device(device_name)
-        # self.cap = cv2.VideoCapture(self.device_path)
-
-        # Make the capture work if on windows.
-        self.cap = cv2.VideoCapture(0)
-        logging.warning("\nUSING SETTINGS FOR WINDOWS DEVELOPMENT!\n")
+        if platform.system() == "Windows":
+            logging.warning("\nUSING SETTINGS FOR WINDOWS DEVELOPMENT!\n")
+            self.cap = cv2.VideoCapture(0)
+            self.exposure_range = (10,600)
+        else:
+            self.device_path = resolve_device(device_name)
+            self.cap = cv2.VideoCapture(self.device_path)
+            self.exposure_range = get_exposure_range(self.device_path)
+            # set_auto_exposure(self.device_path, False)
+            
         
         self.camera_config: CameraConfig = get_camera_config_by_name(device_name)
         self.detector = detector
@@ -35,17 +39,13 @@ class DetectionRunner(AsyncLoopBase):
         self._apply_exposure(self.camera_config.exposure)
 
     def _apply_exposure(self, exposure: int) -> bool:
-        """Apply exposure setting to camera.
-        
-        Returns:
-            bool: True if exposure was successfully applied, False otherwise.
-        """
+        """Apply exposure setting to camera."""
         if self.cap is None or not self.cap.isOpened():
             logger.error("Cannot apply exposure: camera not initialized")
             return False
     
         # Apply exposure value
-        _exposure = exposure_percentage_to_value(exposure)
+        _exposure = exposure_percentage_to_value(exposure, *self.exposure_range)
         applied = self.cap.set(cv2.CAP_PROP_EXPOSURE, _exposure)
         logging.info(f"Applying exposure {_exposure}")
         if not applied:
@@ -57,14 +57,7 @@ class DetectionRunner(AsyncLoopBase):
         return applied
 
     def update_exposure(self, exposure: int) -> bool:
-        """Update camera exposure setting.
-        
-        Args:
-            exposure: Exposure value (camera-specific range, typically negative)
-            
-        Returns:
-            bool: True if exposure was successfully applied.
-        """
+        """Update camera exposure setting."""
         self.camera_config.exposure = exposure
         return self._apply_exposure(exposure)
     

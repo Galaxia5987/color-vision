@@ -4,7 +4,7 @@ import uvicorn
 from app import logging_config
 from app.lifespan.app_lifespan import app_lifespan
 from app.camera.streams import router as streams_router
-from app.api.router import router as api_router
+from app.api import router as api_router
 from app.utils.app_utils import mount_frontend
 
 logging_config.setup_logging()
@@ -15,9 +15,10 @@ app = FastAPI(
     version="0.1.0",
     lifespan=app_lifespan
 )
+api_router.app = app
 
 app.include_router(streams_router)
-app.include_router(api_router)
+app.include_router(api_router.router)
 mount_frontend(app)
 
 

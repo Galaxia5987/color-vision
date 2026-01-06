@@ -1,11 +1,14 @@
 import numpy as np
-from fastapi import APIRouter, Body, HTTPException, Request
+from fastapi import APIRouter, Body, FastAPI, HTTPException, Request
 
 from app.config import ConfigManager, ConfigError
-from app.models.models import RootConfig, CameraConfig
+from app.lifespan.initializer import Initializer
+from app.models.models import Detection, RootConfig, CameraConfig
+from app.utils.device_utils import list_devices
 
 
 router = APIRouter(prefix="/api")
+app: FastAPI | None = None
 
 def _get_camera_config(config: RootConfig, name: str) -> CameraConfig | None:
     return next((cam for cam in config.cameras if cam.name == name), None)
@@ -26,6 +29,37 @@ async def list_cameras() -> dict:
     config = ConfigManager().get()
     return {"cameras": [cam.model_dump() for cam in config.cameras]}
 
+@router.get("/available_cameras")
+async def list_available_cameras() -> list[str]:
+    return list_devices()
+
+@router.put("/cameras/add/{camera_name}")
+async def add_camera(
+    camera_name: str
+) -> str:
+    if camera_name not in list_devices():
+        raise HTTPException(status_code=404, detail=f"Camera {camera_name} not found")
+    config = ConfigManager().get()
+    camera_config = CameraConfig(
+            name=camera_name,
+            mask_stream_enabled=True,
+            detection_stream_enabled=True,
+            detection=Detection(
+                limits=([54,117,33],[88,222,196]),
+                max_area=100000,
+                min_area=500
+            ),
+            exposure=90
+        )
+    config.cameras.append(
+        camera_config
+    )
+
+    ConfigManager().update(config)
+    assert app
+    init: Initializer = app.state.initializer
+    init.add_new_camera(camera_config)
+    return "OK"
 
 @router.patch("/cameras/{camera_name}")
 async def update_camera_settings(

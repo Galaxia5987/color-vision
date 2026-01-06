@@ -50,6 +50,13 @@ const handleConfigUpdated = (updated: CameraConfig) => {
 onMounted(() => {
   void refreshCameras()
 })
+
+onMounted(() => {
+  const onReload = () => {
+    void refreshCameras()
+  }
+  window.addEventListener('reload-cameras', onReload)
+})
 </script>
 
 <template>

@@ -36,4 +36,4 @@ def exposure_percentage_to_value(
     
     # Linear interpolation
     exposure = min_exposure + (percentage / 100.0) * (max_exposure - min_exposure)
-    return 10**exposure
+    return exposure
