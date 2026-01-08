@@ -9,4 +9,15 @@ dependencies = [
     "fastapi[standard]>=0.128.0",
     "opencv-python>=4.12.0.88",
     "pydantic>=2.12.5",
+    "pyntcore",
+    "robotpy_wpinet",
+    "robotpy_wpiutil",
+    "robotpy_wpimath",
 ]
+
+[tool.uv.sources]
+pyntcore = { path = "./deps/pyntcore-2025.3.2.2.dev0+g094dd768.d20250829-cp310-cp310-manylinux_2_36_aarch64.whl" }
+robotpy_wpinet = { path = "./deps/robotpy_wpinet-2025.3.2.2.dev0+g094dd768.d20250829-cp310-cp310-manylinux_2_36_aarch64.whl" }
+robotpy_wpiutil = { path = "./deps/robotpy_wpiutil-2025.3.2.2.dev0+g094dd768.d20250829-cp310-cp310-manylinux_2_36_aarch64.whl" }
+robotpy_wpimath = { path = "./deps/robotpy_wpimath-2025.3.2.2.dev0+g094dd768.d20250829-cp310-cp310-manylinux_2_36_aarch64.whl" }
+ultralytics = { path = "./deps/ultralytics-8.3.241-py3-none-any.whl"}
